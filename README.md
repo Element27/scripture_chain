@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scripture Chain
+
+A faith-based Bible scripture sharing web app built with Next.js, Supabase, and Tailwind CSS.
+
+## What It Does
+
+- Users see active "scripture trees" (themed collections like Faith, Prayer, Advent)
+- They join a tree by scanning a QR code or clicking a shared link
+- Each user generates a random scripture from the tree's theme that links to the previous one
+- A linear chain forms from the root scripture to any given node
+- Anyone can view the chain from origin to any node
+
+## Tech Stack
+
+- Next.js 14+ with App Router and TypeScript
+- Tailwind CSS for styling
+- Supabase for database, Edge Functions, and anonymous auth
+- react-qr-code for QR code generation
 
 ## Getting Started
 
-First, run the development server:
+### 1. Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+ADMIN_PASSWORD=your_admin_password
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
+
+### 2. Supabase Setup
+
+1. Create a new Supabase project at https://supabase.com
+2. Run the SQL migrations in `supabase/migrations/001_initial_schema.sql` in the Supabase SQL Editor
+3. Deploy the Edge Function:
+   - Navigate to the Supabase dashboard
+   - Go to Edge Functions
+   - Create a new function named `generate-scripture`
+   - Paste the code from `supabase/functions/generate-scripture/index.ts`
+
+### 3. Seed Scripture Data
+
+Run the seed script to populate the database with tagged scripture verses:
+
+```bash
+npm run seed
+```
+
+### 4. Run the App
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 to see the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── page.tsx              # Home page with active/past trees
+│   ├── layout.tsx            # Root layout with fonts
+│   ├── admin/page.tsx        # Admin panel for creating trees
+│   ├── node/[slug]/          # Node page (view/generate scripture)
+│   │   ├── page.tsx
+│   │   └── opengraph-image.tsx
+│   └── chain/[slug]/         # Chain page (view ancestry)
+├── components/               # UI components
+│   ├── ScriptureCard.tsx
+│   ├── ChainView.tsx
+│   ├── QRShare.tsx
+│   ├── ReactionBar.tsx
+│   └── TreeCard.tsx
+└── lib/                      # Utilities and config
+    ├── supabase.ts
+    ├── types.ts
+    ├── config.ts
+    └── utils.ts
+supabase/
+├── migrations/               # Database schema
+├── functions/                # Edge Functions
+└── seed-scriptures.ts       # Seed script
+```
 
-## Learn More
+## Design
 
-To learn more about Next.js, take a look at the following resources:
+- Aesthetic: Sacred warmth - illuminated manuscript meets modern mobile app
+- Colors: Deep warm browns (#1a0f0a, #261610), gold accents (#c9933a), cream text (#f5e6c8)
+- Typography: Lora (serif) for scripture, DM Sans for UI
+- Motion: Gentle fade-ups, bloom on reveal, bounce on reactions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Home Page
+- Warm hero section with app name and tagline
+- Active trees displayed as cards with topic, description, node count, closing time
+- Past trees in a separate section
 
-## Deploy on Vercel
+### Node Page
+- State A: Fresh visitor sees the shared scripture, can generate their own
+- State B: After generating, shows new scripture + QR code + share link
+- State C: Viewing own node (detected via session_id)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Chain Page
+- Linear ancestry from root to current node
+- Each card shows scripture text, reference, depth
+- Current node highlighted with "You are here"
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Admin Page
+- Password protected
+- Create new trees with topic, description, tags, closing date
+- View all trees with node counts
+- Close trees manually
+
+## License
+
+MIT
