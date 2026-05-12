@@ -28,7 +28,7 @@ export default function SeedPage() {
   const fetchTopics = async () => {
     const { data } = await supabase
       .from("topics")
-      .select("id, name")
+      .select("id, name, created_at")
       .order("name", { ascending: true });
     if (data) setTopics(data);
     setLoading(false);

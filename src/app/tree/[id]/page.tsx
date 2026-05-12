@@ -164,7 +164,7 @@ export default function TreePage() {
             <p className="text-cream-muted font-ui mb-4">{tree.description}</p>
           )}
 
-          {tree?.scripture_tags.length > 0 && (
+          {tree && tree.scripture_tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
               {tree.scripture_tags.map((tag) => (
                 <span
